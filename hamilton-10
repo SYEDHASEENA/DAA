@@ -1,0 +1,74 @@
+#include <stdio.h>
+#include <stdbool.h>
+
+#define MAX_VERTICES 10
+
+int graph[MAX_VERTICES][MAX_VERTICES]; // adjacency matrix
+int n; // number of vertices
+int path[MAX_VERTICES]; // current path
+bool visited[MAX_VERTICES]; // visited vertices
+
+// function to check if a vertex can be added to the path
+bool isSafe(int v, int pos) {
+    // check if the vertex is adjacent to the last vertex in the path
+    if (!graph[path[pos - 1]][v])
+        return false;
+    // check if the vertex has already been visited
+    for (int i = 0; i < pos; i++) {
+        if (path[i] == v)
+            return false;
+    }
+    return true;
+}
+
+// function to print the Hamiltonian cycle
+void printCycle() {
+    printf("Hamiltonian Cycle: ");
+    for (int i = 0; i < n; i++)
+        printf("%d ", path[i]);
+    printf("%d ", path[0]); // complete the cycle
+    printf("\n");
+}
+
+// recursive function to find all Hamiltonian Cycles
+void hamiltonianCycle(int pos) {
+    // if all vertices have been visited, check if the last vertex is adjacent to the first vertex
+    if (pos == n) {
+        if (graph[path[pos - 1]][path[0]])
+            printCycle();
+        return;
+    }
+    // try all vertices as the next vertex in the path
+    for (int v = 1; v < n; v++) {
+        if (isSafe(v, pos)) {
+            path[pos] = v;
+            visited[v] = true;
+            hamiltonianCycle(pos + 1);
+            // backtrack
+            visited[v] = false;
+            path[pos] = -1;
+        }
+    }
+}
+
+int main() {
+    // read input
+    printf("Enter the number of vertices: ");
+    scanf("%d", &n);
+    printf("Enter the adjacency matrix:\n");
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            scanf("%d", &graph[i][j]);
+        }
+    }
+    // initialize path and visited arrays
+    for (int i = 0; i < n; i++) {
+        path[i] = -1;
+        visited[i] = false;
+    }
+    // start from the first vertex
+    path[0] = 0;
+    visited[0] = true;
+    hamiltonianCycle(1);
+    return 0;
+}
