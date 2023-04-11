@@ -1,90 +1,73 @@
-#include<stdio.h>
-void displaycycl();
-void nextvalue(int k);
-int g[10][10],n,x[10],c=0;
-//hamilton cycle algorithm
-void hamiltonian(int k)
-{
-while(1)
-{
-nextvalue(k);
-if(x[k]==0)
-{
-return;
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_VERTICES 20
+
+int graph[MAX_VERTICES][MAX_VERTICES];
+int colors[MAX_VERTICES];
+int num_vertices, num_colors, chromatic_num = 0, solution_count = 0;
+
+int is_safe(int v, int c) {
+    for (int i = 0; i < num_vertices; i++) {
+        if (graph[v][i] && colors[i] == c) {
+            return 0;
+        }
+    }
+    return 1;
 }
-if(k==n)
-{
-c=c+1;
-displaycycl();
+
+void graph_color(int v) {
+    if (v == num_vertices) {
+        // found a solution
+        solution_count++;
+        printf("Solution %d: ", solution_count);
+        for (int i = 0; i < num_vertices; i++) {
+            printf("Vertex %d: Color %d  ", i, colors[i]);
+        }
+        printf("\n");
+
+        // update chromatic number
+        int max_color = 0;
+        for (int i = 0; i < num_vertices; i++) {
+            if (colors[i] > max_color) {
+                max_color = colors[i];
+            }
+        }
+        if (max_color < chromatic_num || chromatic_num == 0) {
+            chromatic_num = max_color;
+        }
+        return;
+    }
+    for (int c = 1; c <= num_colors; c++) {
+        if (is_safe(v, c)) {
+            colors[v] = c;
+            graph_color(v + 1);
+            colors[v] = 0;
+        }
+    }
 }
-else
-{
-hamiltonian(k+1);
-}
-}
-}
-//nextvalue algorithm to determine kth visiting vertex
-void nextvalue(int k)
-{
-int j;
-while(1)
-{
-x[k] = (x[k]+1)%(n+1);
-if(x[k]==0)
-{
-return;
-}
-if(g[x[k-1]][x[k]] != 0)
-{
-for(j=1;j<=k-1;j++)
-{
-if(x[j] == x[k])
-{
-break;
-}
-}
-if(j==k)
-{
-if((k<n) || ((k==n) && (g[x[n]][x[1]] != 0 )))
-{
-return;
-}
-}
-}
-}
-}
-//function to display solutions
-void displaycycl()
-{
-int i;
-for(i=1;i<=n;i++)
-printf("%d ",x[i]);
-printf("%d ", x[1]);
-printf("\n");
-}
-//main function
-int main()
-{
-int i,j;
-printf("\n enter the no of vertices...");
-scanf("%d",&n);
-printf("\n enter the graph info...");
-for(i=1;i<=n;i++)
-{
-for(j=1;j<=n;j++)
-{
-scanf("%d",&g[i][j]);
-}
-}
-for(i=1;i<=n;i++)
-x[i]=0;
-x[1]=1;
-printf("\n Hamiltonian cycles possible are....\n");
-hamiltonian(2);
-printf("total %d solutions",c);
-if(c==0)
-{
-printf("\n solutions not possible");
-}
-return 0;
+
+int main() {
+    printf("Enter the number of vertices: ");
+    scanf("%d", &num_vertices);
+
+    printf("Enter the adjacency matrix:\n");
+    for (int i = 0; i < num_vertices; i++) {
+        for (int j = 0; j < num_vertices; j++) {
+            scanf("%d", &graph[i][j]);
+        }
+    }
+
+    printf("Enter the maximum number of colors: ");
+    scanf("%d", &num_colors);
+
+    graph_color(0);
+
+    if (solution_count == 0) {
+        printf("No solutions found.\n");
+    } else {
+        printf("Chromatic number: %d\n", chromatic_num);
+    }
+
+    return 0;
 }
